@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .form-container {
+        max-width: 800px;
+        margin: 50px auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      }
+      .form-header {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+      .table-responsive {
+        overflow-x: auto;
+        width: 100%;
+        max-width: 100%;
+      }
+      .table {
+        min-width: 800px;
+      }
+      .table input {
+        width: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="form-container">
+            <h3 class="form-header">DAILY FORM</h3>
+            <form id="dailyForm">
+                <div class="mb-3">
+                    <label class="form-label">NGÀY THÁNG NĂM</label>
+                    <input type="date" class="form-control" name="date" required readonly id="todayDate">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">TỔNG CUỐI NGÀY TRONG KIOT</label>
+                    <input type="text" class="form-control" name="total_kiot" id="total_kiot" placeholder="Nhập số đây" required>
+                    <div class="invalid-feedback">Vui lòng nhập tổng cuối ngày.</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">TIỀN ĐẾM THỰC TẾ</label>
+                    <input type="text" class="form-control" name="real_money" id="real_money" placeholder="Nhập số đây" required>
+                    <div class="invalid-feedback">Vui lòng nhập tiền đếm thực tế.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">KHÁCH CHUYỂN KHOẢN/ EURO</label>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="bankTable">
+                            <thead>
+                                <tr>
+                                    <th>MÃ HÓA ĐƠN CK</th>
+                                    <th>TÊN KHÁCH</th>
+                                    <th>NETTO CK</th>
+                                    <th>AFA CK</th>
+                                    <th>EURO</th>
+                                    <th>XAP XI FT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="text" class="form-control" name="bank_invoice[]"></td>
+                                    <td><input type="text" class="form-control" name="bank_name[]"></td>
+                                    <td><input type="text" class="form-control" name="bank_metto[]"></td>
+                                    <td><input type="text" class="form-control" name="bank_afa[]"></td>
+                                    <td><input type="text" class="form-control" name="bank_euro[]"></td>
+                                    <td><input type="text" class="form-control" name="bank_fpt[]"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addRow('bankTable')">Thêm hàng</button>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">AFA TIỀN MẶT</label>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="afaTable">
+                            <thead>
+                                <tr>
+                                    <th>AFA TIỀN MẶT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="text" class="form-control" name="afa_money[]" placeholder="Nhập số đây"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addRow('afaTable')">Thêm hàng</button>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">KHÁCH NỢ (TIỀN MẶT)</label>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="debtTable">
+                            <thead>
+                                <tr>
+                                    <th>MÃ HÓA ĐƠN NỢ</th>
+                                    <th>TÊN KHÁCH NỢ</th>
+                                    <th>NETTO NỢ</th>
+                                    <th>AFA NỢ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="text" class="form-control" name="debt_invoice[]"></td>
+                                    <td><input type="text" class="form-control" name="debt_name[]"></td>
+                                    <td><input type="text" class="form-control" name="debt_amount[]"></td>
+                                    <td><input type="text" class="form-control" name="debt_note[]"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addRow('debtTable')">Thêm hàng</button>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">KHÁCH TRẢ (TIỀN MẶT)</label>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="payTable">
+                            <thead>
+                                <tr>
+                                    <th>MÃ HÓA ĐƠN NỢ</th>
+                                    <th>TÊN KHÁCH NỢn</th>
+                                    <th>NETTO NỢ</th>
+                                    <th>AFA NỢ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="text" class="form-control" name="pay_invoice[]"></td>
+                                    <td><input type="text" class="form-control" name="pay_name[]"></td>
+                                    <td><input type="text" class="form-control" name="pay_amount[]"></td>
+                                    <td><input type="text" class="form-control" name="pay_note[]"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addRow('payTable')">Thêm hàng</button>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">NHẬP HÀNG</label>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="inTable">
+                            <thead>
+                                <tr>
+                                    <th>LOẠI TIỀN TRẢ</th>
+                                    <th>TÊN HÀNG NHẬP</th>
+                                    <th>NETTO NHẬP</th>
+                                    <th>AFA NHẬP</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <select class="form-control" name="in_invoice[]">
+                                            <option value="">Vui lòng lựa chọn</option>
+                                            <option value="TIỀN MANG ĐI">TIỀN MANG ĐI</option>
+                                            <option value="TIỀN TRONG NGÀY">TIỀN TRONG NGÀY</option>
+                                            <option value="CHUYỂN KHOẢN">CHUYỂN KHOẢN</option>
+                                            <option value="KHÁC">KHÁC</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" class="form-control" name="in_name[]"></td>
+                                    <td><input type="text" class="form-control" name="in_amount[]"></td>
+                                    <td><input type="text" class="form-control" name="in_note[]"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addRow('inTable')">Thêm hàng</button>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">CHI PHÍ RA</label>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="outTable">
+                            <thead>
+                                <tr>
+                                    <th>LOẠI TIỀN</th>
+                                    <th>LOẠI CHI</th>
+                                    <th>NỘI DUNG CHI</th>
+                                    <th>SỐ TIỀN CHI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <select class="form-control" name="out_invoice[]">
+                                            <option value="">Vui lòng lựa chọn</option>
+                                            <option value="TIỀN MANG ĐI">TIỀN MANG ĐI</option>
+                                            <option value="TIỀN TRONG NGÀY">TIỀN TRONG NGÀY</option>
+                                            <option value="CHUYỂN KHOẢN">CHUYỂN KHOẢN</option>
+                                            <option value="KHÁC">KHÁC</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="form-control" name="out_name[]">
+                                            <option value="">Vui lòng lựa chọn</option>
+                                            <option value="LƯƠNG">LƯƠNG</option>
+                                            <option value="CHI PHÍ QUẦY">CHI PHÍ QUẦY</option>
+                                            <option value="KHÁC">KHÁC</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" class="form-control" name="out_amount[]"></td>
+                                    <td><input type="text" class="form-control" name="out_note[]"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addRow('outTable')">Thêm hàng</button>
+                </div>
+                
+                <input type="submit" class="btn btn-primary w-100" onclick="submitForm(event)" value="Gửi">
+            </form>
+        </div>
+    </div>
+    <div id="aggregatedTables"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+            document.getElementById('todayDate').value = formattedDate;
+        });
+
+        function addRow(tableId) {
+            const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            const lastRow = table.rows[table.rows.length - 2]; // Get previous row to copy structure
+
+            if (lastRow) {
+                // Copy structure from the last row
+                for (let i = 0; i < lastRow.cells.length; i++) {
+                    const cell = newRow.insertCell(i);
+                    const originalCell = lastRow.cells[i];
+                    
+                    // Copy the HTML content but reset the value
+                    if (originalCell.querySelector('select')) {
+                        // For select elements
+                        const selectHTML = originalCell.innerHTML;
+                        cell.innerHTML = selectHTML;
+                        cell.querySelector('select').value = '';
+                    } else {
+                        // For input elements
+                        const inputElement = originalCell.querySelector('input');
+                        if (inputElement) {
+                            cell.innerHTML = '<input type="text" class="form-control" name="' + inputElement.name + '" placeholder="' + (inputElement.placeholder || 'Nhập dữ liệu') + '">';
+                        } else {
+                            cell.innerHTML = originalCell.innerHTML;
+                        }
+                    }
+                }
+            } else {
+                // Fallback if no previous row
+                const columns = document.getElementById(tableId).getElementsByTagName('thead')[0].rows[0].cells.length;
+                for (let i = 0; i < columns; i++) {
+                    const cell = newRow.insertCell(i);
+                    cell.innerHTML = '<input type="text" class="form-control" name="' + tableId + '_field[]" placeholder="Nhập dữ liệu">';
+                }
+            }
+        }
+
+        function getAllFormData() {
+            // Get basic form fields
+            const formData = {
+                date: document.querySelector('input[name="date"]').value,
+                total_kiot: document.querySelector('input[name="total_kiot"]').value,
+                real_money: document.querySelector('input[name="real_money"]').value,
+                
+                // Get table data
+                bank_transfers: aggregateTableData('bankTable'),
+                afa_cash: aggregateTableData('afaTable'),
+                debts: aggregateTableData('debtTable'),
+                payments: aggregateTableData('payTable'),
+                inventory_in: aggregateTableData('inTable'),
+                expenses: aggregateTableData('outTable')
+            };
+            
+            console.log('Form Data:', formData);
+            // Display the form data in UI
+            const displayArea = document.getElementById('aggregatedTables');
+            displayArea.innerHTML = '';
+
+            const dataContainer = document.createElement('div');
+            dataContainer.className = 'container form-container mt-4';
+            dataContainer.innerHTML = '<h3 class="form-header">FORM DATA SUMMARY</h3>';
+
+            // Basic information section
+            const basicInfo = document.createElement('div');
+            basicInfo.className = 'mb-4';
+            basicInfo.innerHTML = `
+                <h4>Basic Information</h4>
+                <p><strong>Date:</strong> ${formData.date}</p>
+                <p><strong>Total in Kiot:</strong> ${formData.total_kiot}</p>
+                <p><strong>Actual Money:</strong> ${formData.real_money}</p>
+            `;
+            dataContainer.appendChild(basicInfo);
+
+            // Function to create tables for each data section
+            function createDataTable(title, data, headers) {
+                if (!data || data.length === 0 || data[0].every(cell => !cell)) return null;
+                
+                const section = document.createElement('div');
+                section.className = 'mb-4';
+                section.innerHTML = `<h4>${title}</h4>`;
+                
+                const tableResponsive = document.createElement('div');
+                tableResponsive.className = 'table-responsive';
+                
+                const table = document.createElement('table');
+                table.className = 'table table-bordered table-striped';
+                
+                // Create header
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                headers.forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                // Create body
+                const tbody = document.createElement('tbody');
+                data.forEach(row => {
+                    if (row.some(cell => cell)) {
+                        const tr = document.createElement('tr');
+                        row.forEach(cell => {
+                            const td = document.createElement('td');
+                            td.textContent = cell || '-';
+                            tr.appendChild(td);
+                        });
+                        tbody.appendChild(tr);
+                    }
+                });
+                table.appendChild(tbody);
+                
+                tableResponsive.appendChild(table);
+                section.appendChild(tableResponsive);
+                return section;
+            }
+
+            // Add all data tables
+            dataContainer.appendChild(createDataTable('Bank Transfers/Euro', formData.bank_transfers, 
+                ['MÃ HÓA ĐƠN CK', 'TÊN KHÁCH', 'NETTO CK', 'AFA CK', 'EURO', 'XAP XI FT']) || document.createElement('div'));
+            dataContainer.appendChild(createDataTable('AFA Cash', formData.afa_cash, 
+                ['AFA TIỀN MẶT']) || document.createElement('div'));
+            dataContainer.appendChild(createDataTable('Debts (Cash)', formData.debts, 
+                ['MÃ HÓA ĐƠN NỢ', 'TÊN KHÁCH NỢ', 'NETTO NỢ', 'AFA NỢ']) || document.createElement('div'));
+            dataContainer.appendChild(createDataTable('Payments (Cash)', formData.payments, 
+                ['MÃ HÓA ĐƠN NỢ', 'TÊN KHÁCH NỢ', 'NETTO NỢ', 'AFA NỢ']) || document.createElement('div'));
+            dataContainer.appendChild(createDataTable('Inventory In', formData.inventory_in, 
+                ['LOẠI TIỀN TRẢ', 'TÊN HÀNG NHẬP', 'NETTO NHẬP', 'AFA NHẬP']) || document.createElement('div'));
+            dataContainer.appendChild(createDataTable('Expenses', formData.expenses, 
+                ['LOẠI TIỀN', 'LOẠI CHI', 'NỘI DUNG CHI', 'SỐ TIỀN CHI']) || document.createElement('div'));
+
+            displayArea.appendChild(dataContainer);
+            return formData;
+        }
+    
+        function submitForm(event) {
+            event.preventDefault();
+            const totalKiot = document.getElementById('total_kiot');
+            const realMoney = document.getElementById('real_money');
+            
+            let isValid = true;
+            let firstInvalidElement = null;
+            
+            if (!totalKiot.value.trim()) {
+                totalKiot.classList.add('is-invalid');
+                isValid = false;
+                if (!firstInvalidElement) firstInvalidElement = totalKiot;
+            } else {
+                totalKiot.classList.remove('is-invalid');
+            }
+            
+            if (!realMoney.value.trim()) {
+                realMoney.classList.add('is-invalid');
+                isValid = false;
+                if (!firstInvalidElement) firstInvalidElement = realMoney;
+            } else {
+                realMoney.classList.remove('is-invalid');
+            }
+            
+            if (!isValid && firstInvalidElement) {
+                firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalidElement.focus();
+            }
+            
+            if (isValid) {
+                getAllFormData();
+            }
+        }
+    
+        function aggregateTableData(tableId) {
+            let table = document.getElementById(tableId);
+            let rows = table.getElementsByTagName('tbody')[0].rows;
+            let data = [];
+    
+            for (let i = 0; i < rows.length; i++) {
+                let row = rows[i];
+                let rowData = [];
+                for (let j = 0; j < row.cells.length; j++) {
+                    let input = row.cells[j].getElementsByTagName('input')[0];
+                    let select = row.cells[j].getElementsByTagName('select')[0];
+                    if (input) {
+                        rowData.push(input.value);
+                    } else if (select) {
+                        rowData.push(select.value);
+                    } else {
+                        rowData.push('');
+                    }
+                }
+                data.push(rowData);
+            }
+    
+            return data;
+        }
+    
+        function displayAggregatedData(tableId, data) {
+            let container = document.getElementById('aggregatedTables');
+            let table = document.createElement('h2')
+            table.innerText = tableId;
+            container.appendChild(table);
+            let newTable = document.createElement('table');
+            newTable.className = 'table table-bordered';
+    
+            let thead = document.createElement('thead');
+            let headerRow = document.createElement('tr');
+            let headers = document.getElementById(tableId).getElementsByTagName('thead')[0].rows[0].cells;
+    
+            for (let i = 0; i < headers.length; i++) {
+                let th = document.createElement('th');
+                th.innerText = headers[i].innerText;
+                headerRow.appendChild(th);
+            }
+            thead.appendChild(headerRow);
+            newTable.appendChild(thead);
+    
+            let tbody = document.createElement('tbody');
+            for (let i = 0; i < data.length; i++) {
+                let row = document.createElement('tr');
+                for (let j = 0; j < data[i].length; j++) {
+                    let cell = document.createElement('td');
+                    cell.innerText = data[i][j];
+                    row.appendChild(cell);
+                }
+                tbody.appendChild(row);
+            }
+            newTable.appendChild(tbody);
+    
+            container.appendChild(newTable);
+        }
+
+        // Function to send data to Google Sheets
+        function sendToGoogleSheets(formData) {
+            // Convert form data to format suitable for Google Sheets
+            const sheetData = prepareDataForSheets(formData);
+            
+            // URL of the deployed Google Apps Script Web App
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbw44ovKzl5xw7X2ngj-4hpSTtaCnFydckQ8BYyOXRzuREvKQrsty3qLuPJ628-u5-Yi/exec'; // Update with your deployed script URL
+            
+            // Show loading indicator
+            const submitBtn = document.querySelector('input[type="submit"]');
+            const originalBtnText = submitBtn.value;
+            submitBtn.value = 'Đang gửi...';
+            submitBtn.disabled = true;
+            
+            // Send data to Google Sheets via the Apps Script
+            fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify(sheetData),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                mode: 'no-cors' // Add this to bypass CORS restrictions
+            })
+            .then(() => {
+                // With no-cors mode, we can't access the response details
+                // so we simply assume success if no error occurred
+                alert('Dữ liệu đã được gửi thành công!');
+                console.log('Request sent successfully');
+            })
+            .catch(error => {
+                alert('Có lỗi xảy ra khi gửi dữ liệu: ' + error.message);
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                submitBtn.value = originalBtnText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        // Function to prepare data for Google Sheets
+        function prepareDataForSheets(formData) {
+            // Format numbers properly
+            const formatNumber = (value) => {
+                if (!value) return '';
+                return value.toString().replace(/[^\d.]/g, '');
+            };
+            
+            // Create header row with all column names
+            const header = [
+                'NGÀY THÁNG NĂM', 'TỔNG CUỐI NGÀY TRONG KIOT', 'TIỀN ĐẾM THỰC TẾ', '',
+                'AFA TIỀN MẶT', '', 
+                'MÃ HÓA ĐƠN CK', 'TÊN KHÁCH', 'NETTO CK', 'AFA CK', 'EURO', 'XAP XI FT', '', 
+                'MÃ HÓA ĐƠN NỢ', 'TÊN KHÁCH NỢ', 'NETTO NỢ', 'AFA NỢ', '', 
+                'MÃ HÓA ĐƠN TRẢ', 'TÊN KHÁCH TRẢ', 'NETTO TRẢ', 'AFA TRẢ', '', 
+                'LOẠI TIỀN TRẢ', 'TÊN HÀNG NHẬP', 'NETTO NHẬP', 'AFA NHẬP', '', 
+                'LOẠI TIỀN', 'LOẠI CHI', 'NỘI DUNG CHI', 'SỐ TIỀN CHI'
+            ];
+            
+            // Prepare data arrays with proper formatting
+            const afaCash = formData.afa_cash.map(row => [formatNumber(row[0])]);
+            const bankTransfers = formData.bank_transfers.map(row => 
+                [row[0], row[1], formatNumber(row[2]), formatNumber(row[3]), formatNumber(row[4]), row[5]]);
+            const debts = formData.debts.map(row => 
+                [row[0], row[1], formatNumber(row[2]), formatNumber(row[3])]);
+            const payments = formData.payments.map(row => 
+                [row[0], row[1], formatNumber(row[2]), formatNumber(row[3])]);
+            const inventory = formData.inventory_in.map(row => 
+                [row[0], row[1], formatNumber(row[2]), formatNumber(row[3])]);
+            const expenses = formData.expenses.map(row => 
+                [row[0], row[1], row[2], formatNumber(row[3])]);
+            
+            // Find the maximum number of rows needed
+            const maxRows = Math.max(
+                afaCash.length,
+                bankTransfers.length,
+                debts.length,
+                payments.length,
+                inventory.length,
+                expenses.length
+            );
+            
+            // Create the main data array
+            const allData = [header];
+            
+            // Add the basic info to the first row
+            const basicRow = [
+                formData.date,
+                formatNumber(formData.total_kiot),
+                formatNumber(formData.real_money),
+                ''
+            ];
+            
+            // Create data rows
+            for (let i = 0; i < maxRows; i++) {
+                const row = [];
+                
+                // Add basic info only to first row
+                if (i === 0) {
+                    row.push(...basicRow);
+                } else {
+                    row.push('', '', '', '');
+                }
+                
+                // Add AFA cash data
+                row.push(i < afaCash.length ? afaCash[i][0] : '', '');
+                
+                // Add bank transfers data
+                if (i < bankTransfers.length) {
+                    row.push(...bankTransfers[i], '');
+                } else {
+                    row.push('', '', '', '', '', '', '');
+                }
+                
+                // Add debts data
+                if (i < debts.length) {
+                    row.push(...debts[i], '');
+                } else {
+                    row.push('', '', '', '', '');
+                }
+                
+                // Add payments data
+                if (i < payments.length) {
+                    row.push(...payments[i], '');
+                } else {
+                    row.push('', '', '', '', '');
+                }
+                
+                // Add inventory data
+                if (i < inventory.length) {
+                    row.push(...inventory[i], '');
+                } else {
+                    row.push('', '', '', '', '');
+                }
+                
+                // Add expenses data
+                if (i < expenses.length) {
+                    row.push(...expenses[i]);
+                } else {
+                    row.push('', '', '', '');
+                }
+                
+                allData.push(row);
+            }
+            
+            return { allData: allData };
+        }
+
+        // Update submitForm to send data to Google Sheets
+        function submitForm(event) {
+            event.preventDefault();
+            const totalKiot = document.getElementById('total_kiot');
+            const realMoney = document.getElementById('real_money');
+            
+            let isValid = true;
+            let firstInvalidElement = null;
+            
+            if (!totalKiot.value.trim()) {
+                totalKiot.classList.add('is-invalid');
+                isValid = false;
+                if (!firstInvalidElement) firstInvalidElement = totalKiot;
+            } else {
+                totalKiot.classList.remove('is-invalid');
+            }
+            
+            if (!realMoney.value.trim()) {
+                realMoney.classList.add('is-invalid');
+                isValid = false;
+                if (!firstInvalidElement) firstInvalidElement = realMoney;
+            } else {
+                realMoney.classList.remove('is-invalid');
+            }
+            
+            if (!isValid && firstInvalidElement) {
+                firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalidElement.focus();
+                return;
+            }
+            
+            if (isValid) {
+                const formData = getAllFormData();
+                sendToGoogleSheets(formData);
+            }
+        }
+    </script>
+</body>
+</html>
