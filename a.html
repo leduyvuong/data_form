@@ -41,17 +41,13 @@
             <h3 class="form-header">DAILY FORM</h3>
             <form id="dailyForm">
                 <div class="mb-3">
-                    <label class="form-label">NGÀY THÁNG NĂM</label>
-                    <input type="date" class="form-control" name="date" required readonly id="todayDate">
-                </div>
-                <div class="mb-3">
                     <label class="form-label">TỔNG CUỐI NGÀY TRONG KIOT</label>
-                    <input type="text" class="form-control" name="total_kiot" id="total_kiot" placeholder="Nhập số đây" required>
+                    <input type="text" class="form-control" name="total_kiot" id="total_kiot" placeholder="Nhập số đây">
                     <div class="invalid-feedback">Vui lòng nhập tổng cuối ngày.</div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">TIỀN ĐẾM THỰC TẾ</label>
-                    <input type="text" class="form-control" name="real_money" id="real_money" placeholder="Nhập số đây" required>
+                    <input type="text" class="form-control" name="real_money" id="real_money" placeholder="Nhập số đây">
                     <div class="invalid-feedback">Vui lòng nhập tiền đếm thực tế.</div>
                 </div>
 
@@ -232,12 +228,6 @@
     </div>
     <div id="aggregatedTables"></div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const today = new Date();
-            const formattedDate = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-            document.getElementById('todayDate').value = formattedDate;
-        });
-
         function addRow(tableId) {
             const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
             const newRow = table.insertRow();
@@ -374,40 +364,6 @@
             return formData;
         }
     
-        function submitForm(event) {
-            event.preventDefault();
-            const totalKiot = document.getElementById('total_kiot');
-            const realMoney = document.getElementById('real_money');
-            
-            let isValid = true;
-            let firstInvalidElement = null;
-            
-            if (!totalKiot.value.trim()) {
-                totalKiot.classList.add('is-invalid');
-                isValid = false;
-                if (!firstInvalidElement) firstInvalidElement = totalKiot;
-            } else {
-                totalKiot.classList.remove('is-invalid');
-            }
-            
-            if (!realMoney.value.trim()) {
-                realMoney.classList.add('is-invalid');
-                isValid = false;
-                if (!firstInvalidElement) firstInvalidElement = realMoney;
-            } else {
-                realMoney.classList.remove('is-invalid');
-            }
-            
-            if (!isValid && firstInvalidElement) {
-                firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstInvalidElement.focus();
-            }
-            
-            if (isValid) {
-                getAllFormData();
-            }
-        }
-    
         function aggregateTableData(tableId) {
             let table = document.getElementById(tableId);
             let rows = table.getElementsByTagName('tbody')[0].rows;
@@ -427,7 +383,9 @@
                         rowData.push('');
                     }
                 }
-                data.push(rowData);
+                if (!rowData.every(cell => cell === '')) {
+                    data.push(rowData);
+                }
             }
     
             return data;
@@ -469,43 +427,7 @@
         }
 
         // Function to send data to Google Sheets
-        function sendToGoogleSheets(formData) {
-            // Convert form data to format suitable for Google Sheets
-            const sheetData = prepareDataForSheets(formData);
-            
-            // URL of the deployed Google Apps Script Web App
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbw44ovKzl5xw7X2ngj-4hpSTtaCnFydckQ8BYyOXRzuREvKQrsty3qLuPJ628-u5-Yi/exec'; // Update with your deployed script URL
-            
-            // Show loading indicator
-            const submitBtn = document.querySelector('input[type="submit"]');
-            const originalBtnText = submitBtn.value;
-            submitBtn.value = 'Đang gửi...';
-            submitBtn.disabled = true;
-            
-            // Send data to Google Sheets via the Apps Script
-            fetch(scriptURL, {
-                method: 'POST',
-                body: JSON.stringify(sheetData),
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                mode: 'no-cors' // Add this to bypass CORS restrictions
-            })
-            .then(() => {
-                // With no-cors mode, we can't access the response details
-                // so we simply assume success if no error occurred
-                alert('Dữ liệu đã được gửi thành công!');
-                console.log('Request sent successfully');
-            })
-            .catch(error => {
-                alert('Có lỗi xảy ra khi gửi dữ liệu: ' + error.message);
-                console.error('Error:', error);
-            })
-            .finally(() => {
-                submitBtn.value = originalBtnText;
-                submitBtn.disabled = false;
-            });
-        }
+        
 
         // Function to prepare data for Google Sheets
         function prepareDataForSheets(formData) {
@@ -618,39 +540,102 @@
         // Update submitForm to send data to Google Sheets
         function submitForm(event) {
             event.preventDefault();
-            const totalKiot = document.getElementById('total_kiot');
-            const realMoney = document.getElementById('real_money');
+            const formData = {
+                total_kiot: document.querySelector('input[name="total_kiot"]').value,
+                real_money: document.querySelector('input[name="real_money"]').value,
+                
+                // Get table data
+                bank_transfers: aggregateTableData('bankTable'),
+                afa_cash: aggregateTableData('afaTable'),
+                debts: aggregateTableData('debtTable'),
+                payments: aggregateTableData('payTable'),
+                inventory_in: aggregateTableData('inTable'),
+                expenses: aggregateTableData('outTable')
+            };
+
+            console.log('Form Data:', formData);
+
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbxF5tR-x2XkV8PRhj7N28B_p1iXnzeOuJ5lzZgEJaQp2cMzu_PlwfOaf8wJSbTKAykmNQ/exec'; // Update with your deployed script URL
             
-            let isValid = true;
-            let firstInvalidElement = null;
+            // Show loading indicator
+            const submitBtn = document.querySelector('input[type="submit"]');
+            const originalBtnText = submitBtn.value;
+            submitBtn.value = 'Đang gửi...';
+            submitBtn.disabled = true;
             
-            if (!totalKiot.value.trim()) {
-                totalKiot.classList.add('is-invalid');
-                isValid = false;
-                if (!firstInvalidElement) firstInvalidElement = totalKiot;
-            } else {
-                totalKiot.classList.remove('is-invalid');
-            }
-            
-            if (!realMoney.value.trim()) {
-                realMoney.classList.add('is-invalid');
-                isValid = false;
-                if (!firstInvalidElement) firstInvalidElement = realMoney;
-            } else {
-                realMoney.classList.remove('is-invalid');
-            }
-            
-            if (!isValid && firstInvalidElement) {
-                firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstInvalidElement.focus();
-                return;
-            }
-            
-            if (isValid) {
-                const formData = getAllFormData();
-                sendToGoogleSheets(formData);
-            }
+            // Send data to Google Sheets via the Apps Script
+            fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify(formData),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                mode: 'no-cors' // Add this to bypass CORS restrictions
+            })
+            .then(() => {
+                // With no-cors mode, we can't access the response details
+                // so we simply assume success if no error occurred
+                alert('Dữ liệu đã được gửi thành công!');
+                // Clear all input fields
+                document.querySelectorAll('input[type="text"]').forEach(input => {
+                    input.value = '';
+                });
+
+                document.querySelectorAll('input[type="date"]').forEach(input => {
+                    input.value = '';
+                });
+
+                document.querySelectorAll('select').forEach(select => {
+                    select.selectedIndex = 0;
+                });
+                console.log('Request sent successfully');
+            })
+            .catch(error => {
+                alert('Có lỗi xảy ra khi gửi dữ liệu: ' + error.message);
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                submitBtn.value = originalBtnText;
+                submitBtn.disabled = false;
+            });
         }
+
+        function fillRandomData() {
+            const randomString = () => Math.random().toString(36).substring(2, 8);
+            const randomNumber = () => Math.floor(Math.random() * 1000);
+
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                input.value = randomString();
+            });
+
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                const randomDate = new Date(Date.now() - Math.floor(Math.random() * 10000000000));
+                input.value = randomDate.toISOString().split('T')[0];
+            });
+
+            document.querySelectorAll('select').forEach(select => {
+                const options = select.options;
+                select.selectedIndex = Math.floor(Math.random() * options.length);
+            });
+        }
+
+        // Add a button to trigger the fillRandomData function
+        // const fillButton = document.createElement('button');
+        // fillButton.type = 'button';
+        // fillButton.className = 'btn btn-secondary';
+        // fillButton.textContent = 'Fill Random Data';
+        // fillButton.onclick = fillRandomData;
+        const redirectButton = document.createElement('button');
+        redirectButton.type = 'button';
+        redirectButton.className = 'btn btn-info';
+        redirectButton.textContent = 'Go to Sheets';
+        redirectButton.onclick = () => {
+            window.open('https://docs.google.com/spreadsheets/d/1wdTkyIiH1Ab7CLZhCjlcxkyhn1TbmjdNNGoT1L8-fQg/edit?gid=1750737141#gid=1750737141', '_blank');
+        };
+
+        document.querySelector('.form-container').prepend(redirectButton);
+
+        document.querySelector('.form-container').prepend(fillButton);
     </script>
 </body>
 </html>
